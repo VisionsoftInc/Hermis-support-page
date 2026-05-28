@@ -16,7 +16,7 @@ const PORT = process.env.PORT || 5000;
 // Middleware
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
-app.use(express.static('public'));
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Configuration - Using Microsoft Graph API
 const HERMIS_BACKEND_URL = process.env.HERMIS_BACKEND_URL || 'http://localhost:4000';

@@ -42,12 +42,36 @@
             <h3>Oops! Something went wrong</h3>
             <p id="errorText"></p>
           </div>
+
+          <div class="divider">OR</div>
+
+          <div class="call-section">
+            <h2>Call Support Team</h2>
+            <p class="form-intro">
+              If you need immediate help, contact our support team directly.
+              Click below to choose how you want to call.
+            </p>
+
+            <button type="button" class="submit-btn call-toggle-btn" onclick="toggleCallOptions()">
+              Contact Support
+            </button>
+
+            <div id="callOptions" class="call-options hidden">
+              <button type="button" class="call-option-btn" onclick="callSupportViaDialer()">
+                Phone Dialer
+              </button>
+              <button type="button" class="call-option-btn" onclick="callSupportViaWhatsApp()">
+                WhatsApp Call
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
       <div class="footer">
         <p>Support ticket system powered by Hermis CRM</p>
         <p class="support-email">Send email to: <strong>events@visionsoftaspaclimited.onmicrosoft.com</strong></p>
+        <p class="support-email">Phone support available through the call options above</p>
       </div>
     </div>
   </div>

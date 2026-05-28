@@ -1,8 +1,11 @@
 // Configuration
 const SUPPORT_EMAIL = 'events@visionsoftaspaclimited.onmicrosoft.com';
+const SUPPORT_PHONE = '+919390385763';
 
 // Open email client with pre-filled To: address
 function openEmailClient() {
+  hideCallOptions();
+
   // Simple mailto link with just the To: address
   const mailtoLink = `mailto:${SUPPORT_EMAIL}`;
 
@@ -39,6 +42,42 @@ function showSuccess() {
       successMsg.classList.add('hidden');
     }, 3000);
   }
+}
+
+function toggleCallOptions() {
+  hideError();
+
+  const callOptions = document.getElementById('callOptions');
+  if (!callOptions) return;
+
+  callOptions.classList.toggle('hidden');
+}
+
+function hideCallOptions() {
+  const callOptions = document.getElementById('callOptions');
+  if (callOptions) {
+    callOptions.classList.add('hidden');
+  }
+}
+
+function callSupportViaDialer() {
+  hideError();
+  const dialLink = `tel:${SUPPORT_PHONE}`;
+
+  const link = document.createElement('a');
+  link.href = dialLink;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+
+  hideCallOptions();
+}
+
+function callSupportViaWhatsApp() {
+  hideError();
+  const whatsappLink = `https://wa.me/${SUPPORT_PHONE.replace('+', '')}`;
+  window.open(whatsappLink, '_blank', 'noopener,noreferrer');
+  hideCallOptions();
 }
 
 function showError(message) {

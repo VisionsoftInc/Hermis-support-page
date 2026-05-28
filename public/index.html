@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hermis Support - Submit a Ticket</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <div class="support-card">
+      <div class="header">
+        <h1>Hermis Support</h1>
+        <p class="subtitle">We're here to help</p>
+      </div>
+
+      <div class="content">
+        <p class="intro-text">
+          If you have any queries or issues, please let us know. 
+          We'll respond as soon as possible.
+        </p>
+
+        <!-- Simple Email Button Section -->
+        <div class="form-section">
+          <h2>Send us an Email</h2>
+          <p class="form-intro">Click the button below to open your email client and send us your support request.</p>
+          
+          <div class="button-container">
+            <button type="button" class="submit-btn email-btn" onclick="openEmailClient()">
+              ✉ Open Email
+            </button>
+          </div>
+
+          <div id="successMessage" class="success-message hidden">
+            <div class="checkmark">✓</div>
+            <h3>Email Opening!</h3>
+            <p id="successText">Your email client is opening. Please fill in the subject and message, then send to events@visionsoftaspaclimited.onmicrosoft.com</p>
+          </div>
+
+          <div id="errorMessage" class="error-message hidden">
+            <div class="error-icon">✕</div>
+            <h3>Oops! Something went wrong</h3>
+            <p id="errorText"></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer">
+        <p>Support ticket system powered by Hermis CRM</p>
+        <p class="support-email">Send email to: <strong>events@visionsoftaspaclimited.onmicrosoft.com</strong></p>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

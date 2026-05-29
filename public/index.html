@@ -9,32 +9,42 @@
 <body>
   <div class="container">
     <div class="support-card">
+
+      <!-- Header -->
       <div class="header">
         <h1>Hermis Support</h1>
         <p class="subtitle">We're here to help</p>
       </div>
 
+      <!-- Main content -->
       <div class="content">
         <p class="intro-text">
-          If you have any queries or issues, please let us know. 
+          If you have any queries or issues, please let us know.
           We'll respond as soon as possible.
         </p>
 
-        <!-- Simple Email Button Section -->
         <div class="form-section">
+
+          <!-- Email -->
           <h2>Send us an Email</h2>
-          <p class="form-intro">Click the button below to open your email client and send us your support request.</p>
-          
+          <p class="form-intro">
+            Click the button below to open your email client and send us your support request.
+          </p>
+
           <div class="button-container">
             <button type="button" class="submit-btn email-btn" onclick="openEmailClient()">
               ✉ Open Email
             </button>
           </div>
 
+          <!-- Success / Error banners -->
           <div id="successMessage" class="success-message hidden">
             <div class="checkmark">✓</div>
             <h3>Email Opening!</h3>
-            <p id="successText">Your email client is opening. Please fill in the subject and message, then send to events@visionsoftaspaclimited.onmicrosoft.com</p>
+            <p id="successText">
+              Your email client is opening. Please fill in the subject and message,
+              then send to events@visionsoftaspaclimited.onmicrosoft.com
+            </p>
           </div>
 
           <div id="errorMessage" class="error-message hidden">
@@ -45,36 +55,119 @@
 
           <div class="divider">OR</div>
 
+          <!-- AI Chat -->
+          <div class="ai-section">
+            <h2>Chat with Visionsoft AI</h2>
+            <p class="form-intro">
+              Get instant support from Visionsoft AI and find answers to your questions 24/7.
+            </p>
+            <button type="button" class="submit-btn ai-btn" onclick="openAIPanel()">
+              🤖 Start AI Chat
+            </button>
+          </div>
+
+          <div class="divider">OR</div>
+
+          <!-- Call -->
           <div class="call-section">
             <h2>Call Support Team</h2>
             <p class="form-intro">
               If you need immediate help, contact our support team directly.
               Click the number below to choose how you want to call.
             </p>
-
             <button type="button" class="submit-btn call-toggle-btn" onclick="toggleCallOptions()">
-              Call: +91 6309776185
+              📞 Call: +91 6309776185
             </button>
-
             <div id="callOptions" class="call-options hidden">
               <button type="button" class="call-option-btn" onclick="callSupportViaDialer()">
-                Phone Dialer
+                📱 Phone Dialer
               </button>
               <button type="button" class="call-option-btn" onclick="callSupportViaWhatsApp()">
-                WhatsApp Call
+                💬 WhatsApp Call
               </button>
             </div>
           </div>
+
         </div>
       </div>
 
+      <!-- Footer -->
       <div class="footer">
         <p>Support ticket system powered by Hermis CRM</p>
-        <p class="support-email">Send email to: <strong>events@visionsoftaspaclimited.onmicrosoft.com</strong></p>
+        <p class="support-email">
+          Send email to: <strong>events@visionsoftaspaclimited.onmicrosoft.com</strong>
+        </p>
         <p class="support-email">Call support: <strong>+91 6309776185</strong></p>
       </div>
+
     </div>
   </div>
+
+  <!-- ─── AI Support Panel (slide-in from right) ──────────────────────────── -->
+  <div id="aiPanel" class="ai-panel">
+
+    <!-- Panel header -->
+    <div class="ai-header">
+      <div class="ai-header-info">
+        <div class="ai-avatar">VS</div>
+        <div>
+          <div class="ai-header-name">🤖 Visionsoft AI</div>
+          <div class="ai-header-status">● Online — replies instantly</div>
+        </div>
+      </div>
+      <button onclick="closeAIPanel()" aria-label="Close chat">✕</button>
+    </div>
+
+    <!-- Message list -->
+    <div id="chatMessages" class="chat-messages">
+      <div class="message-wrap bot">
+        <div class="bot-message">
+          Hello 👋 I'm Visionsoft AI.<br>
+          How can I help you today?
+        </div>
+        <span class="msg-time"></span>
+      </div>
+    </div>
+
+    <!-- Inline ticket form (shown when AI sets needsTicket=true) -->
+    <div id="ticketFormArea" class="ticket-form-area hidden">
+      <div class="ticket-form-title">📋 Raise a Support Ticket</div>
+
+      <!-- Visible fields for the customer -->
+      <input  id="tf_name"  type="text"   placeholder="Your name *"         autocomplete="name" />
+      <input  id="tf_phone" type="tel"    placeholder="Phone number *"       autocomplete="tel" />
+      <input  id="tf_email" type="email"  placeholder="Email (optional)"     autocomplete="email" />
+
+      <!-- Hidden fields pre-filled by AI -->
+      <input  id="tf_subject"  type="hidden" />
+      <input  id="tf_summary"  type="hidden" />
+      <input  id="tf_category" type="hidden" />
+      <input  id="tf_original" type="hidden" />
+
+      <div class="ticket-form-actions">
+        <button type="button" class="tf-cancel-btn"  onclick="hideTicketForm()">Cancel</button>
+        <button type="button" class="tf-submit-btn" id="ticketSubmitBtn" onclick="submitTicket()">
+          Submit Ticket
+        </button>
+      </div>
+    </div>
+
+    <!-- Input row -->
+    <div class="chat-input-area">
+      <input
+        id="chatInput"
+        type="text"
+        placeholder="Describe your issue…"
+        autocomplete="off"
+      />
+      <button onclick="sendMessage()" aria-label="Send">
+        ➤
+      </button>
+    </div>
+
+  </div>
+  <!-- ── Backdrop (click to close panel on mobile) ── -->
+  <div id="aiBackdrop" class="ai-backdrop" onclick="closeAIPanel()"></div>
 
   <script src="script.js"></script>
 </body>

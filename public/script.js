@@ -12,7 +12,7 @@ const GEMINI_MODEL   = 'gemini-2.5-flash';
 //   'https://api.hermis.yourdomain.com'   ← production
 //   'http://localhost:4000'               ← local dev
 // Leave as '' only if this HTML file is served directly by the same Express server.
-const HERMIS_API = 'http://localhost:4000';
+const HERMIS_API = 'https://visionsoft-crm-backend.onrender.com';
 
 // ─── Visionsoft AI System Prompt (from viraPrompt.js) ────────────────────────
 const VIRA_SYSTEM_PROMPT = `

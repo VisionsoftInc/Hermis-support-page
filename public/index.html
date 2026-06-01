@@ -68,6 +68,19 @@
 
           <div class="divider">OR</div>
 
+          <!-- WhatsApp -->
+          <div class="whatsapp-section">
+            <h2>Send Issue on WhatsApp</h2>
+            <p class="form-intro">
+              Open WhatsApp and send your issue directly to our support team. Once the message reaches the business number, Hermis can create the ticket automatically from the webhook.
+            </p>
+            <button type="button" class="submit-btn whatsapp-btn" onclick="openWhatsAppChat()">
+              💬 WhatsApp Support
+            </button>
+          </div>
+
+          <div class="divider">OR</div>
+
           <!-- Call -->
           <div class="call-section">
             <h2>Call Support Team</h2>
@@ -75,7 +88,7 @@
               If you need immediate help, contact our support team directly.
               Click the number below to choose how you want to call.
             </p>
-            <button type="button" class="submit-btn call-toggle-btn" onclick="toggleCallOptions()">
+            <button id="callSupportToggleBtn" type="button" class="submit-btn call-toggle-btn" onclick="toggleCallOptions()">
               📞 Call: +91 9390385763
             </button>
             <div id="callOptions" class="call-options hidden">
@@ -97,7 +110,8 @@
         <p class="support-email">
           Send email to: <strong>events@visionsoftaspaclimited.onmicrosoft.com</strong>
         </p>
-        <p class="support-email">Call support: <strong>+91 9390385763</strong></p>
+        <p class="support-email">Call support: <strong id="footerCallSupportNumber">+91 9390385763</strong></p>
+        <p class="support-email">WhatsApp support: <strong id="footerWhatsappSupportNumber">Configured from support page script</strong></p>
       </div>
 
     </div>

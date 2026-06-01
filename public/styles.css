@@ -138,6 +138,18 @@ body {
   box-shadow: 0 10px 25px rgba(124, 58, 237, 0.3);
 }
 
+/* WhatsApp button variant */
+.whatsapp-btn {
+  background: white;
+  color: #128c7e;
+  border: 2px solid #128c7e;
+}
+.whatsapp-btn:hover {
+  background: #128c7e;
+  color: white;
+  box-shadow: 0 10px 25px rgba(18, 140, 126, 0.28);
+}
+
 /* Call button variant */
 .call-toggle-btn {
   background: white;
@@ -200,6 +212,7 @@ body {
 
 /* ─── Section wrappers ───────────────────────────────────────────────────────── */
 .ai-section,
+.whatsapp-section,
 .call-section { text-align: center; }
 
 /* ─── Success message ────────────────────────────────────────────────────────── */

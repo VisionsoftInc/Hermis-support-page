@@ -21,6 +21,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Configuration - Using Microsoft Graph API
 const HERMIS_BACKEND_URL = process.env.HERMIS_BACKEND_URL || 'http://localhost:4000';
 const EMAIL_RECEIVER = process.env.EMAIL_RECEIVER || 'events@visionsoft.com';
+const SUPPORT_PHONE_NUMBER = process.env.SUPPORT_PHONE_NUMBER || process.env.WHATSAPP_SUPPORT_NUMBER || '+919390385763';
+const WHATSAPP_SUPPORT_NUMBER = process.env.WHATSAPP_SUPPORT_NUMBER || '+919390385763';
+const WHATSAPP_DEFAULT_TEXT = process.env.WHATSAPP_DEFAULT_TEXT || 'Hello Hermis Support, I want to report an issue.';
 
 // Microsoft Graph API Configuration
 const MS_GRAPH_TENANT_ID = process.env.MS_GRAPH_TENANT_ID;
@@ -247,6 +250,14 @@ app.get('/api/support/mailto-info', (req, res) => {
     recipient: EMAIL_RECEIVER,
     subject: 'Support Request',
     instructions: `Click the button to send an email to ${EMAIL_RECEIVER}. Your email will be automatically converted into a ticket.`,
+  });
+});
+
+app.get('/api/support/config', (req, res) => {
+  return res.json({
+    supportPhoneNumber: SUPPORT_PHONE_NUMBER,
+    whatsappSupportNumber: WHATSAPP_SUPPORT_NUMBER,
+    whatsappDefaultText: WHATSAPP_DEFAULT_TEXT,
   });
 });
 

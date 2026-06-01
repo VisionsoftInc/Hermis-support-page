@@ -1,6 +1,8 @@
 // ─── Configuration ────────────────────────────────────────────────────────────
 const SUPPORT_EMAIL = 'events@visionsoftaspaclimited.onmicrosoft.com';
-const SUPPORT_PHONE = '+919390385763';
+let SUPPORT_PHONE = '+917731800138';
+let WHATSAPP_SUPPORT_NUMBER = SUPPORT_PHONE;
+let WHATSAPP_DEFAULT_TEXT = 'Hello Hermis Support, I want to report an issue.';
 
 // ⚠️  Paste your Gemini API key here.
 // Get one free at: https://aistudio.google.com/app/apikey
@@ -13,6 +15,7 @@ const GEMINI_MODEL   = 'gemini-2.5-flash';
 //   'http://localhost:4000'               ← local dev
 // Leave as '' only if this HTML file is served directly by the same Express server.
 const HERMIS_API = 'https://visionsoft-crm-backend.onrender.com';
+// const HERMIS_API = 'http://localhost:4000';
 
 // ─── Visionsoft AI System Prompt (from viraPrompt.js) ────────────────────────
 const VIRA_SYSTEM_PROMPT = `
@@ -368,8 +371,21 @@ function callSupportViaDialer() {
 
 function callSupportViaWhatsApp() {
   hideError();
-  window.open(`https://wa.me/${SUPPORT_PHONE.replace('+', '')}`, '_blank', 'noopener,noreferrer');
+  openWhatsAppChat();
   hideCallOptions();
+}
+
+function openWhatsAppChat() {
+  hideError();
+  const normalizedNumber = WHATSAPP_SUPPORT_NUMBER.replace(/[^\d]/g, '');
+
+  if (!normalizedNumber) {
+    showError('WhatsApp support number is not configured yet.');
+    return;
+  }
+
+  const encodedText = encodeURIComponent(WHATSAPP_DEFAULT_TEXT);
+  window.open(`https://wa.me/${normalizedNumber}?text=${encodedText}`, '_blank', 'noopener,noreferrer');
 }
 
 // ─── Error helpers ─────────────────────────────────────────────────────────────
@@ -453,8 +469,65 @@ function setSendDisabled(disabled) {
   if (input) input.disabled = disabled;
 }
 
+function formatSupportPhone(value = '') {
+  const digits = String(value || '').replace(/[^\d]/g, '');
+  if (!digits) return '-';
+  if (digits.length === 12 && digits.startsWith('91')) {
+    return `+${digits.slice(0, 2)} ${digits.slice(2)}`;
+  }
+  if (digits.length === 10) {
+    return `+91 ${digits}`;
+  }
+  if (String(value).startsWith('+')) {
+    return String(value);
+  }
+  return `+${digits}`;
+}
+
+function updateSupportContactLabels() {
+  const callToggle = document.getElementById('callSupportToggleBtn');
+  if (callToggle) {
+    callToggle.textContent = `📞 Call: ${formatSupportPhone(SUPPORT_PHONE)}`;
+  }
+
+  const callFooter = document.getElementById('footerCallSupportNumber');
+  if (callFooter) {
+    callFooter.textContent = formatSupportPhone(SUPPORT_PHONE);
+  }
+
+  const whatsappFooter = document.getElementById('footerWhatsappSupportNumber');
+  if (whatsappFooter) {
+    whatsappFooter.textContent = formatSupportPhone(WHATSAPP_SUPPORT_NUMBER);
+  }
+}
+
+async function loadSupportConfig() {
+  try {
+    const response = await fetch('/api/support/config');
+    if (!response.ok) {
+      return;
+    }
+
+    const config = await response.json();
+    if (config?.supportPhoneNumber) {
+      SUPPORT_PHONE = String(config.supportPhoneNumber).trim();
+    }
+    if (config?.whatsappSupportNumber) {
+      WHATSAPP_SUPPORT_NUMBER = String(config.whatsappSupportNumber).trim();
+    }
+    if (config?.whatsappDefaultText) {
+      WHATSAPP_DEFAULT_TEXT = String(config.whatsappDefaultText).trim();
+    }
+  } catch (error) {
+    console.warn('Support config could not be loaded:', error);
+  } finally {
+    updateSupportContactLabels();
+  }
+}
+
 // Enter key to send
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  await loadSupportConfig();
   const input = document.getElementById('chatInput');
   if (input) {
     input.addEventListener('keydown', (e) => {

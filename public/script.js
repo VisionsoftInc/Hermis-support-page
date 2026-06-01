@@ -378,7 +378,8 @@ function callSupportViaWhatsApp() {
 
 function openWhatsAppChat() {
   hideError();
-  const normalizedNumber = WHATSAPP_SUPPORT_NUMBER.replace(/[^\d]/g, '');
+  const sourceNumber = SUPPORT_PHONE || WHATSAPP_SUPPORT_NUMBER;
+  const normalizedNumber = String(sourceNumber || '').replace(/[^\d]/g, '');
 
   if (!normalizedNumber) {
     showError('WhatsApp support number is not configured yet.');
@@ -498,7 +499,7 @@ function updateSupportContactLabels() {
 
   const whatsappFooter = document.getElementById('footerWhatsappSupportNumber');
   if (whatsappFooter) {
-    whatsappFooter.textContent = formatSupportPhone(WHATSAPP_SUPPORT_NUMBER);
+    whatsappFooter.textContent = formatSupportPhone(SUPPORT_PHONE || WHATSAPP_SUPPORT_NUMBER);
   }
 }
 
@@ -515,6 +516,10 @@ async function loadSupportConfig() {
     }
     if (config?.whatsappSupportNumber) {
       WHATSAPP_SUPPORT_NUMBER = String(config.whatsappSupportNumber).trim();
+    }
+    // Keep WhatsApp contact aligned to support phone so button never opens an outdated test chat.
+    if (SUPPORT_PHONE) {
+      WHATSAPP_SUPPORT_NUMBER = SUPPORT_PHONE;
     }
     if (config?.whatsappDefaultText) {
       WHATSAPP_DEFAULT_TEXT = String(config.whatsappDefaultText).trim();

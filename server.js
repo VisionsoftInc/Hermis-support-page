@@ -256,7 +256,7 @@ app.get('/api/support/mailto-info', (req, res) => {
 app.get('/api/support/config', (req, res) => {
   return res.json({
     supportPhoneNumber: SUPPORT_PHONE_NUMBER,
-    whatsappSupportNumber: WHATSAPP_SUPPORT_NUMBER,
+    whatsappSupportNumber: SUPPORT_PHONE_NUMBER,
     whatsappDefaultText: WHATSAPP_DEFAULT_TEXT,
   });
 });

@@ -14,8 +14,9 @@ const GEMINI_MODEL   = 'gemini-2.5-flash';
 //   'https://api.hermis.yourdomain.com'   ← production
 //   'http://localhost:4000'               ← local dev
 // Leave as '' only if this HTML file is served directly by the same Express server.
-const HERMIS_API = 'https://visionsoft-crm-backend.onrender.com';
-// const HERMIS_API = 'http://localhost:4000';
+const HERMIS_API = window.location.hostname === 'localhost'
+  ? 'http://localhost:4000'
+  : 'https://visionsoft-crm-backend.onrender.com';
 
 // ─── Visionsoft AI System Prompt (from viraPrompt.js) ────────────────────────
 const VIRA_SYSTEM_PROMPT = `
@@ -560,7 +561,13 @@ function hideTicketForm() {
 // ─── Ticket submission — posts to /api/tickets/create (ticketController) ──────
 // This is the SAME endpoint the Hermis tickets page reads from, so tickets
 // raised here appear immediately in the Hermis CRM ticket list.
+let ticketSubmitInProgress = false;
+
 async function submitTicket() {
+  if (ticketSubmitInProgress) {
+    return;
+  }
+
   const name     = (document.getElementById('tf_name')?.value  || '').trim();
   const phone    = (document.getElementById('tf_phone')?.value || '').trim();
   const email    = (document.getElementById('tf_email')?.value || '').trim();
@@ -580,6 +587,7 @@ async function submitTicket() {
   }
 
   const submitBtn = document.getElementById('ticketSubmitBtn');
+  ticketSubmitInProgress = true;
   if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Submitting…'; }
 
   // Build description in the same format as viraController.js so it looks
@@ -611,7 +619,7 @@ async function submitTicket() {
         subject:       subject || `${category} — support request`,
         // Optional enrichment
         description,
-        source:        'SUPPORT_PAGE',   // visible in Hermis as the source tag
+        source:        'Live Chat',   // visible in Hermis as the source tag
         priority:      'MEDIUM',
         status:        'OPEN',
         assignedTeam:  'Support Team',
@@ -650,6 +658,8 @@ async function submitTicket() {
       `⚠️ Couldn't create the ticket right now (${err.message}). Please email us at ${SUPPORT_EMAIL} with your issue and we'll handle it manually.`
     );
     hideTicketForm();
+  } finally {
+    ticketSubmitInProgress = false;
   }
 }
 

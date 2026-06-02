@@ -19,7 +19,12 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Configuration - Using Microsoft Graph API
-const HERMIS_BACKEND_URL = process.env.HERMIS_BACKEND_URL || 'https://visionsoft-crm-backend.onrender.com';
+const DEFAULT_HERMIS_BACKEND_URL = 'https://visionsoft-crm-backend.onrender.com';
+const rawHermisBackendUrl = String(process.env.HERMIS_BACKEND_URL || '').trim();
+const hermisBackendLooksLocal = /localhost|127\.0\.0\.1/i.test(rawHermisBackendUrl);
+const HERMIS_BACKEND_URL = rawHermisBackendUrl
+  ? (process.env.RENDER && hermisBackendLooksLocal ? DEFAULT_HERMIS_BACKEND_URL : rawHermisBackendUrl)
+  : DEFAULT_HERMIS_BACKEND_URL;
 const EMAIL_RECEIVER = process.env.EMAIL_RECEIVER || 'events@visionsoft.com';
 const SUPPORT_PHONE_NUMBER = process.env.SUPPORT_PHONE_NUMBER || process.env.WHATSAPP_SUPPORT_NUMBER || '+919390385763';
 const WHATSAPP_SUPPORT_NUMBER = process.env.WHATSAPP_SUPPORT_NUMBER || '+919390385763';
@@ -31,8 +36,20 @@ const MS_GRAPH_CLIENT_ID = process.env.MS_GRAPH_CLIENT_ID;
 const MS_GRAPH_CLIENT_SECRET = process.env.MS_GRAPH_CLIENT_SECRET;
 const MS_GRAPH_SENDER_EMAIL = process.env.MS_GRAPH_SENDER_EMAIL;
 
-if (process.env.RENDER && HERMIS_BACKEND_URL.includes('localhost')) {
-  console.warn('⚠ HERMIS_BACKEND_URL points to localhost on Render. Set HERMIS_BACKEND_URL to your public Hermis API URL.');
+if (process.env.RENDER && hermisBackendLooksLocal) {
+  console.warn('⚠ HERMIS_BACKEND_URL points to localhost on Render. Overriding to default public Hermis API URL.');
+}
+
+function safeSerializeError(error) {
+  if (!error) return 'Unknown error';
+  if (typeof error === 'string') return error;
+  if (error.message) return error.message;
+
+  try {
+    return JSON.stringify(error);
+  } catch {
+    return String(error);
+  }
 }
 
 let accessToken = null;
@@ -300,12 +317,18 @@ app.post('/api/support/create-ticket', async (req, res) => {
     const statusCode = error.response?.status;
     const statusText = error.response?.statusText;
     const responseData = error.response?.data;
-    const fallbackMessage = error.message || 'Unknown error';
+    const fallbackMessage = safeSerializeError(error);
+    const errorCode = error.code;
+    const requestUrl = error.config?.url;
+    const requestMethod = error.config?.method;
 
     console.error('Error creating Hermis ticket from support page:', {
       statusCode,
       statusText,
       responseData,
+      errorCode,
+      requestUrl,
+      requestMethod,
       message: fallbackMessage,
     });
 

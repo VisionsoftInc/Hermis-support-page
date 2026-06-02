@@ -82,6 +82,72 @@ body {
   line-height: 1.5;
 }
 
+/* ─── Web ticket form ───────────────────────────────────────────────────────── */
+.ticket-web-section {
+  text-align: left;
+}
+
+.web-ticket-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.web-ticket-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.web-ticket-form input,
+.web-ticket-form textarea {
+  width: 100%;
+  border: 1.5px solid #d1d5db;
+  border-radius: 8px;
+  padding: 11px 12px;
+  font-size: 14px;
+  color: #111827;
+  background: #ffffff;
+  font-family: inherit;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.web-ticket-form textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.web-ticket-form input:focus,
+.web-ticket-form textarea:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+}
+
+.ticket-result {
+  margin-top: 10px;
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.ticket-result.hidden {
+  display: none;
+}
+
+.ticket-result.success {
+  background: #effcf3;
+  border: 1px solid #86efac;
+  color: #166534;
+}
+
+.ticket-result.error {
+  background: #fef2f2;
+  border: 1px solid #fca5a5;
+  color: #991b1b;
+}
+
 /* ─── Buttons ────────────────────────────────────────────────────────────────── */
 .button-container {
   display: flex;
@@ -591,6 +657,10 @@ body {
   .content { padding: 24px 18px; }
 
   .submit-btn { font-size: 14px; }
+
+  .web-ticket-grid {
+    grid-template-columns: 1fr;
+  }
 
   /* Full-screen panel on mobile */
   .ai-panel {

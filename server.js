@@ -244,6 +244,64 @@ Ticket will be created automatically in Hermis.
   }
 });
 
+// Endpoint: Create ticket directly in Hermis (used by Generate Ticket web form)
+app.post('/api/support/create-ticket', async (req, res) => {
+  try {
+    const {
+      customerName,
+      customerPhone,
+      customerEmail,
+      subject,
+      description,
+      source,
+      priority,
+      status,
+    } = req.body;
+
+    if (!customerName || !customerPhone || !subject || !description) {
+      return res.status(400).json({
+        success: false,
+        message: 'Missing required fields: customerName, customerPhone, subject, description',
+      });
+    }
+
+    const payload = {
+      customerName,
+      customerPhone,
+      customerEmail: customerEmail || '',
+      subject,
+      description,
+      source: 'WEB',
+      priority: priority || 'MEDIUM',
+      status: status || 'OPEN',
+    };
+
+    const ticketResponse = await axios.post(
+      `${HERMIS_BACKEND_URL}/api/tickets/create`,
+      payload,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        timeout: 15000,
+      }
+    );
+
+    return res.status(201).json({
+      success: true,
+      message: 'Ticket created in Hermis',
+      data: ticketResponse.data?.data || ticketResponse.data,
+    });
+  } catch (error) {
+    console.error('Error creating Hermis ticket from support page:', error.response?.data || error.message);
+    return res.status(502).json({
+      success: false,
+      message: 'Failed to create ticket in Hermis',
+      error: error.response?.data?.message || error.message,
+    });
+  }
+});
+
 // Endpoint: Get mailto configuration (for frontend)
 app.get('/api/support/mailto-info', (req, res) => {
   return res.json({

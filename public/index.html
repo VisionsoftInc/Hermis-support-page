@@ -25,6 +25,34 @@
 
         <div class="form-section">
 
+          <!-- Web Ticket Form -->
+          <div class="ticket-web-section">
+            <h2>Generate Support Ticket</h2>
+            <p class="form-intro">
+              Fill out this form to create a support ticket instantly.
+            </p>
+
+            <form id="webTicketForm" class="web-ticket-form">
+              <div class="web-ticket-grid">
+                <input id="wt_name" type="text" placeholder="Your name *" autocomplete="name" required>
+                <input id="wt_phone" type="tel" placeholder="Phone number *" autocomplete="tel" required>
+              </div>
+              <input id="wt_email" type="email" placeholder="Email (optional)" autocomplete="email">
+              <input id="wt_subject" type="text" placeholder="Issue subject *" required>
+              <textarea id="wt_message" placeholder="Describe your issue in detail *" rows="4" required></textarea>
+
+              <div class="button-container">
+                <button id="webTicketSubmitBtn" type="submit" class="submit-btn">
+                  Generate Ticket
+                </button>
+              </div>
+            </form>
+
+            <div id="webTicketResult" class="ticket-result hidden" aria-live="polite"></div>
+          </div>
+
+          <div class="divider">OR</div>
+
           <!-- Email -->
           <h2>Send us an Email</h2>
           <p class="form-intro">

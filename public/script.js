@@ -326,6 +326,7 @@ Return ONLY valid JSON:
 // ─── Conversation history (in-memory for this session) ────────────────────────
 // Format matches viraController.js: { from: 'user'|'vira', text: '...' }
 let conversationHistory = [];
+let webTicketSubmitInProgress = false;
 
 // ─── Email ─────────────────────────────────────────────────────────────────────
 function openEmailClient() {
@@ -405,6 +406,106 @@ function showError(message) {
 function hideError() {
   const el = document.getElementById('errorMessage');
   if (el) el.classList.add('hidden');
+}
+
+function showWebTicketResult(type, message) {
+  const result = document.getElementById('webTicketResult');
+  if (!result) return;
+
+  result.classList.remove('hidden', 'success', 'error');
+  result.classList.add(type === 'success' ? 'success' : 'error');
+  result.textContent = message;
+}
+
+function clearWebTicketResult() {
+  const result = document.getElementById('webTicketResult');
+  if (!result) return;
+  result.classList.add('hidden');
+  result.classList.remove('success', 'error');
+  result.textContent = '';
+}
+
+async function submitWebTicketForm(e) {
+  e.preventDefault();
+  if (webTicketSubmitInProgress) {
+    return;
+  }
+
+  clearWebTicketResult();
+
+  const name = (document.getElementById('wt_name')?.value || '').trim();
+  const phone = (document.getElementById('wt_phone')?.value || '').trim();
+  const email = (document.getElementById('wt_email')?.value || '').trim();
+  const subject = (document.getElementById('wt_subject')?.value || '').trim();
+  const message = (document.getElementById('wt_message')?.value || '').trim();
+
+  if (!name || !phone || !subject || !message) {
+    showWebTicketResult('error', 'Please fill all required fields.');
+    return;
+  }
+
+  const submitBtn = document.getElementById('webTicketSubmitBtn');
+  webTicketSubmitInProgress = true;
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Generating...';
+  }
+
+  const description = [
+    'Raised via Hermis Support Page (Web Form)',
+    '',
+    `Customer Name: ${name}`,
+    `Customer Email: ${email || 'Not provided'}`,
+    `Customer Phone: ${phone}`,
+    '',
+    'Issue Description:',
+    message,
+  ].join('\n');
+
+  try {
+    const res = await fetch('/api/support/create-ticket', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        customerName: name,
+        customerPhone: phone,
+        customerEmail: email || '',
+        subject,
+        description,
+        source: 'WEB',
+        priority: 'MEDIUM',
+        status: 'OPEN',
+      }),
+    });
+
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.message || `HTTP ${res.status}`);
+    }
+
+    const data = await res.json();
+    const ticketNumber = data?.data?.ticketNumber || '';
+
+    if (ticketNumber) {
+      showWebTicketResult('success', `Ticket generated successfully. Ticket number: ${ticketNumber}`);
+    } else {
+      showWebTicketResult('success', 'Ticket generated successfully. Our support team will contact you shortly.');
+    }
+
+    const form = document.getElementById('webTicketForm');
+    if (form) {
+      form.reset();
+    }
+  } catch (error) {
+    console.error('Web ticket form submit error:', error);
+    showWebTicketResult('error', `Unable to generate ticket right now (${error.message}). Please try again.`);
+  } finally {
+    webTicketSubmitInProgress = false;
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Generate Ticket';
+    }
+  }
 }
 
 // ─── AI Panel open / close ─────────────────────────────────────────────────────
@@ -538,6 +639,12 @@ async function loadSupportConfig() {
 // Enter key to send
 document.addEventListener('DOMContentLoaded', async () => {
   await loadSupportConfig();
+
+  const webTicketForm = document.getElementById('webTicketForm');
+  if (webTicketForm) {
+    webTicketForm.addEventListener('submit', submitWebTicketForm);
+  }
+
   const input = document.getElementById('chatInput');
   if (input) {
     input.addEventListener('keydown', (e) => {

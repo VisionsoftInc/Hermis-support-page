@@ -2,7 +2,7 @@
 const SUPPORT_EMAIL = 'events@visionsoftaspaclimited.onmicrosoft.com';
 let SUPPORT_PHONE = '+917731800138';
 let WHATSAPP_SUPPORT_NUMBER = SUPPORT_PHONE;
-let WHATSAPP_DEFAULT_TEXT = 'Hello Hermis Support, I want to report an issue.';
+let WHATSAPP_DEFAULT_TEXT = '';
 
 // ⚠️  Paste your Gemini API key here.
 // Get one free at: https://aistudio.google.com/app/apikey
@@ -386,8 +386,12 @@ function openWhatsAppChat() {
     return;
   }
 
-  const encodedText = encodeURIComponent(WHATSAPP_DEFAULT_TEXT);
-  window.open(`https://wa.me/${normalizedNumber}?text=${encodedText}`, '_blank', 'noopener,noreferrer');
+  const trimmedText = String(WHATSAPP_DEFAULT_TEXT || '').trim();
+  const whatsappUrl = trimmedText
+    ? `https://wa.me/${normalizedNumber}?text=${encodeURIComponent(trimmedText)}`
+    : `https://wa.me/${normalizedNumber}`;
+
+  window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
 }
 
 // ─── Error helpers ─────────────────────────────────────────────────────────────

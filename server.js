@@ -23,7 +23,7 @@ const HERMIS_BACKEND_URL = process.env.HERMIS_BACKEND_URL || 'http://localhost:4
 const EMAIL_RECEIVER = process.env.EMAIL_RECEIVER || 'events@visionsoft.com';
 const SUPPORT_PHONE_NUMBER = process.env.SUPPORT_PHONE_NUMBER || process.env.WHATSAPP_SUPPORT_NUMBER || '+919390385763';
 const WHATSAPP_SUPPORT_NUMBER = process.env.WHATSAPP_SUPPORT_NUMBER || '+919390385763';
-const WHATSAPP_DEFAULT_TEXT = process.env.WHATSAPP_DEFAULT_TEXT || 'Hello Hermis Support, I want to report an issue.';
+const WHATSAPP_DEFAULT_TEXT = (process.env.WHATSAPP_DEFAULT_TEXT || '').trim();
 
 // Microsoft Graph API Configuration
 const MS_GRAPH_TENANT_ID = process.env.MS_GRAPH_TENANT_ID;

@@ -19,7 +19,7 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Configuration - Using Microsoft Graph API
-const HERMIS_BACKEND_URL = process.env.HERMIS_BACKEND_URL || 'http://localhost:4000';
+const HERMIS_BACKEND_URL = process.env.HERMIS_BACKEND_URL || 'https://visionsoft-crm-backend.onrender.com';
 const EMAIL_RECEIVER = process.env.EMAIL_RECEIVER || 'events@visionsoft.com';
 const SUPPORT_PHONE_NUMBER = process.env.SUPPORT_PHONE_NUMBER || process.env.WHATSAPP_SUPPORT_NUMBER || '+919390385763';
 const WHATSAPP_SUPPORT_NUMBER = process.env.WHATSAPP_SUPPORT_NUMBER || '+919390385763';
@@ -30,6 +30,10 @@ const MS_GRAPH_TENANT_ID = process.env.MS_GRAPH_TENANT_ID;
 const MS_GRAPH_CLIENT_ID = process.env.MS_GRAPH_CLIENT_ID;
 const MS_GRAPH_CLIENT_SECRET = process.env.MS_GRAPH_CLIENT_SECRET;
 const MS_GRAPH_SENDER_EMAIL = process.env.MS_GRAPH_SENDER_EMAIL;
+
+if (process.env.RENDER && HERMIS_BACKEND_URL.includes('localhost')) {
+  console.warn('⚠ HERMIS_BACKEND_URL points to localhost on Render. Set HERMIS_BACKEND_URL to your public Hermis API URL.');
+}
 
 let accessToken = null;
 let tokenExpiry = null;
@@ -293,11 +297,22 @@ app.post('/api/support/create-ticket', async (req, res) => {
       data: ticketResponse.data?.data || ticketResponse.data,
     });
   } catch (error) {
-    console.error('Error creating Hermis ticket from support page:', error.response?.data || error.message);
+    const statusCode = error.response?.status;
+    const statusText = error.response?.statusText;
+    const responseData = error.response?.data;
+    const fallbackMessage = error.message || 'Unknown error';
+
+    console.error('Error creating Hermis ticket from support page:', {
+      statusCode,
+      statusText,
+      responseData,
+      message: fallbackMessage,
+    });
+
     return res.status(502).json({
       success: false,
       message: 'Failed to create ticket in Hermis',
-      error: error.response?.data?.message || error.message,
+      error: error.response?.data?.message || fallbackMessage,
     });
   }
 });

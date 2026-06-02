@@ -278,8 +278,58 @@ body {
 
 /* ─── Section wrappers ───────────────────────────────────────────────────────── */
 .ai-section,
-.whatsapp-section,
 .call-section { text-align: center; }
+
+/* ─── Floating WhatsApp button ─────────────────────────────────────────────── */
+.floating-whatsapp-btn {
+  position: fixed;
+  right: 22px;
+  bottom: 22px;
+  z-index: 10001;
+  border: none;
+  border-radius: 100%;
+  background: #25d366;
+  color: #ffffff;
+  width: 68px;
+  height: 68px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
+  box-shadow: 0 12px 24px rgba(37, 211, 102, 0.35);
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+}
+
+.floating-whatsapp-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 28px rgba(37, 211, 102, 0.4);
+}
+
+.floating-whatsapp-btn:active {
+  transform: translateY(0);
+}
+
+.floating-whatsapp-icon {
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.floating-whatsapp-svg {
+  width: 28px;
+  height: 28px;
+  display: block;
+}
+
+.ai-panel.open ~ .floating-whatsapp-btn {
+  opacity: 0;
+  pointer-events: none;
+}
 
 /* ─── Success message ────────────────────────────────────────────────────────── */
 .success-message {
@@ -670,5 +720,12 @@ body {
 
   .call-options {
     grid-template-columns: 1fr;
+  }
+
+  .floating-whatsapp-btn {
+    right: 14px;
+    bottom: 14px;
+    width: 58px;
+    height: 58px;
   }
 }

@@ -26,8 +26,8 @@ const HERMIS_BACKEND_URL = rawHermisBackendUrl
   ? (process.env.RENDER && hermisBackendLooksLocal ? DEFAULT_HERMIS_BACKEND_URL : rawHermisBackendUrl)
   : DEFAULT_HERMIS_BACKEND_URL;
 const EMAIL_RECEIVER = process.env.EMAIL_RECEIVER || 'events@visionsoft.com';
-const SUPPORT_PHONE_NUMBER = process.env.SUPPORT_PHONE_NUMBER || process.env.WHATSAPP_SUPPORT_NUMBER || '+919390385763';
-const WHATSAPP_SUPPORT_NUMBER = process.env.WHATSAPP_SUPPORT_NUMBER || '+919390385763';
+const SUPPORT_PHONE_NUMBER = process.env.SUPPORT_PHONE_NUMBER || process.env.WHATSAPP_SUPPORT_NUMBER || '+917731800138';
+const WHATSAPP_SUPPORT_NUMBER = process.env.WHATSAPP_SUPPORT_NUMBER || '+917731800138';
 const WHATSAPP_DEFAULT_TEXT = (process.env.WHATSAPP_DEFAULT_TEXT || '').trim();
 
 // Microsoft Graph API Configuration

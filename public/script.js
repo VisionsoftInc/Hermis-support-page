@@ -709,7 +709,7 @@ async function submitTicket() {
   // Build description in the same format as viraController.js so it looks
   // consistent in the Hermis ticket detail view.
   const description = [
-    'Raised via Hermis Support Page (Visionsoft AI)',
+    'Ticket raised from Visionsoft AI chat',
     '',
     `Customer Name:  ${name}`,
     `Customer Email: ${email  || 'Not provided'}`,

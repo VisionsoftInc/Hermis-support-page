@@ -498,6 +498,37 @@ body {
   padding: 0 2px;
 }
 
+/* SAP order card (rendered from verbatim backend values) */
+.bot-message.order-card {
+  max-width: 90%;
+  padding: 12px 14px;
+  border-left: 3px solid #6d28d9;
+}
+.order-card .oc-title {
+  font-weight: 700;
+  font-size: 13.5px;
+  margin-bottom: 8px;
+  color: #4c1d95;
+}
+.order-card .oc-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 3px 0;
+  border-bottom: 1px dashed #ececec;
+  font-size: 13px;
+}
+.order-card .oc-row:last-of-type { border-bottom: none; }
+.order-card .oc-row span { color: #777; }
+.order-card .oc-row b { color: #1a1a1a; text-align: right; }
+.order-card .oc-items {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #eee;
+  font-size: 12.5px;
+  color: #444;
+}
+
 /* ─── Typing indicator ───────────────────────────────────────────────────────── */
 .typing-indicator {
   display: flex;

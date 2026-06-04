@@ -4,8 +4,24 @@ import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import axios from 'axios';
+import Anthropic from '@anthropic-ai/sdk';
+import { createSapClient } from './sapClient.js';
+import { createAiAgent } from './aiAgent.js';
+import { createSupportRoutes } from './routes.js';
 
 dotenv.config();
+
+const sapClient = createSapClient(process.env);
+const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+const aiAgent = createAiAgent({
+  anthropic,
+  sapClient,
+  model: process.env.ANTHROPIC_MODEL || 'claude-sonnet-4-6',
+});
+
+if (!process.env.ANTHROPIC_API_KEY) {
+  console.warn('⚠ ANTHROPIC_API_KEY is not set — the chatbot /api/support/chat route will return the unavailable message.');
+}
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -17,6 +33,9 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
+
+// SAP order-lookup chatbot routes (/api/support/chat, /api/support/order-lookup)
+app.use('/api/support', createSupportRoutes({ sapClient, aiAgent }));
 
 // Configuration - Using Microsoft Graph API
 const DEFAULT_HERMIS_BACKEND_URL = 'https://visionsoft-crm-backend.onrender.com';

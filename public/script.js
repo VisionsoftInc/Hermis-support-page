@@ -4,10 +4,8 @@ let SUPPORT_PHONE = '+917731800138';
 let WHATSAPP_SUPPORT_NUMBER = SUPPORT_PHONE;
 let WHATSAPP_DEFAULT_TEXT = '';
 
-// ⚠️  Paste your Gemini API key here.
-// Get one free at: https://aistudio.google.com/app/apikey
-const GEMINI_API_KEY = 'YOUR_GEMINI_API_KEY_HERE';
-const GEMINI_MODEL   = 'gemini-2.5-flash';
+// The chatbot now runs server-side (Claude + SAP) via /api/support/chat on THIS server.
+// No AI key lives in the browser anymore — SAP and Anthropic credentials stay in server .env.
 
 // Base URL of your deployed Hermis backend.
 // Examples:
@@ -793,49 +791,39 @@ function showFormError(msg) {
   setTimeout(() => { if (errEl) errEl.textContent = ''; }, 3000);
 }
 
-// ─── Gemini API call (direct — no backend needed for chat) ───────────────────
-async function callGemini(userMessage) {
-  if (!GEMINI_API_KEY || GEMINI_API_KEY === 'YOUR_GEMINI_API_KEY_HERE') {
-    throw new Error('no_api_key');
-  }
+// ─── Order card renderer (shows verbatim SAP values returned by the backend) ──
+function renderOrderCard(order) {
+  if (!order) return;
+  const container = document.getElementById('chatMessages');
+  if (!container) return;
 
-  const contents = [];
-  for (const turn of conversationHistory) {
-    if (turn.from === 'user' && turn.text?.trim())
-      contents.push({ role: 'user',  parts: [{ text: turn.text }] });
-    else if (turn.from === 'vira' && turn.text?.trim())
-      contents.push({ role: 'model', parts: [{ text: turn.text }] });
-  }
-  contents.push({ role: 'user', parts: [{ text: userMessage }] });
+  const rows = [
+    ['Sales Order', order.salesOrder],
+    ['Status', order.overallStatus],
+    ['Net Cost', order.netAmount ? `${order.currency || ''} ${order.netAmount}`.trim() : null],
+    ['Process Order', order.processOrder],
+    ['Shipment No.', order.shipmentNumber],
+  ].filter(([, v]) => v != null && v !== '');
 
-  const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`,
-    {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        system_instruction: { parts: [{ text: VIRA_SYSTEM_PROMPT }] },
-        contents,
-        generationConfig: { responseMimeType: 'application/json' },
-      }),
-    }
-  );
+  const itemsHtml = (order.items || []).length
+    ? `<div class="oc-items"><b>Items:</b><br>${order.items
+        .map((it) => `• ${it.material} × ${it.quantity} — ${order.currency || ''} ${it.netAmount}`)
+        .join('<br>')}</div>`
+    : '';
 
-  if (!res.ok) throw new Error(`gemini_http_${res.status}`);
-
-  const json    = await res.json();
-  const rawText = json?.candidates?.[0]?.content?.parts?.[0]?.text || '';
-  const cleaned = rawText.replace(/```json|```/gi, '').trim();
-
-  try { return JSON.parse(cleaned); }
-  catch {
-    const s = cleaned.indexOf('{'), e = cleaned.lastIndexOf('}');
-    if (s !== -1 && e > s) return JSON.parse(cleaned.slice(s, e + 1));
-    throw new Error('invalid_json');
-  }
+  const wrap = document.createElement('div');
+  wrap.classList.add('message-wrap', 'bot');
+  wrap.innerHTML = `
+    <div class="bot-message order-card">
+      <div class="oc-title">📦 Order ${order.salesOrder || ''}</div>
+      ${rows.map(([k, v]) => `<div class="oc-row"><span>${k}</span><b>${v}</b></div>`).join('')}
+      ${itemsHtml}
+    </div>`;
+  container.appendChild(wrap);
+  container.scrollTop = container.scrollHeight;
 }
 
-// ─── Client-side fallback (mirrors buildFallbackResponse in viraController.js)─
+// ─── Client-side fallback (used only if the chat backend is unreachable) ──────
 function buildFallback(message) {
   const t = message.toLowerCase();
   if (/^(hi|hello|hey|hii|helo|good morning|good afternoon|good evening)[!., ]*$/i.test(message.trim()))
@@ -874,31 +862,48 @@ async function sendMessage() {
 
   conversationHistory.push({ from: 'user', text: userText });
 
-  let ai;
+  let data;
   try {
-    ai = await callGemini(userText);
+    const res = await fetch('/api/support/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: userText, history: conversationHistory }),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    data = await res.json();
   } catch (err) {
-    console.warn('Gemini unavailable, using fallback:', err.message);
-    ai = buildFallback(userText);
+    console.warn('Chat backend unavailable, using fallback:', err.message);
+    const fb = buildFallback(userText);
+    data = {
+      reply: fb.reply,
+      orderData: null,
+      needsTicket: fb.needsTicket,
+      ticketDraft: fb.needsTicket
+        ? { subject: fb.ticketSubject, description: fb.ticketSummary, issueCategory: fb.issueCategory }
+        : null,
+    };
   }
 
   removeTypingIndicator();
   setSendDisabled(false);
   input.focus();
 
-  const reply = ai?.reply || 'I am here to help. Could you describe what you need?';
+  const reply = data?.reply || 'I am here to help. Could you share your sales order number?';
   appendMessage('bot', reply);
   conversationHistory.push({ from: 'vira', text: reply });
 
-  if (ai?.needsTicket) {
+  if (data?.orderData) renderOrderCard(data.orderData);
+
+  if (data?.needsTicket) {
+    const draft = data.ticketDraft || {};
     setTimeout(() => {
-      appendMessage('bot', 'Would you like to raise a support ticket? Fill in your details below and I\'ll get it logged for you.');
+      appendMessage('bot', "I can raise a support ticket for this. Add your name and phone below and I'll log it.");
       showTicketForm({
-        ticketSubject:   ai.ticketSubject  || 'Support request',
-        ticketSummary:   ai.ticketSummary  || userText,
-        issueCategory:   ai.issueCategory  || 'Other',
+        ticketSubject:   draft.subject     || 'Support request',
+        ticketSummary:   draft.description  || userText,
+        issueCategory:   draft.issueCategory || 'Other',
         originalMessage: userText,
       });
-    }, 500);
+    }, 400);
   }
 }

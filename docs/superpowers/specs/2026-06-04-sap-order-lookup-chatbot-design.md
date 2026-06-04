@@ -9,8 +9,9 @@
 Extend the existing "Visionsoft AI" support chatbot so that when a customer enters a
 **SAP Sales Order number**, the bot returns live order data fetched directly from SAP
 (order number, sales order, process order, shipment number, cost, status, line items).
-The bot also answers **"what is the last/latest order in SAP sales?"** by returning the
-most recently created sales order (and its details). If SAP has no answer (order not found,
+Any valid Sales Order number the customer enters returns that order's **status and full
+details**. The bot also answers **"what is the last/latest order in SAP sales?"** by
+returning the most recently created sales order (and its details). If SAP has no answer (order not found,
 SAP unreachable, auth error), the bot raises a ticket in the Hermis backend instead.
 
 Scope of this first version: **order lookup + ticket fallback.** Existing chat behaviour

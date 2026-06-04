@@ -9,8 +9,9 @@
 Extend the existing "Visionsoft AI" support chatbot so that when a customer enters a
 **SAP Sales Order number**, the bot returns live order data fetched directly from SAP
 (order number, sales order, process order, shipment number, cost, status, line items).
-If SAP has no answer (order not found, SAP unreachable, auth error), the bot raises a
-ticket in the Hermis backend instead.
+The bot also answers **"what is the last/latest order in SAP sales?"** by returning the
+most recently created sales order (and its details). If SAP has no answer (order not found,
+SAP unreachable, auth error), the bot raises a ticket in the Hermis backend instead.
 
 Scope of this first version: **order lookup + ticket fallback.** Existing chat behaviour
 (general support Q&A, email/WhatsApp/call buttons, web ticket form) is preserved.
@@ -76,6 +77,10 @@ Functions:
   Standard S/4HANA fields: `SalesOrder`, `SalesOrderType`, `OverallSDProcessStatus`,
   `TotalNetAmount`, `TransactionCurrency`, `to_Item` (`Material`, `RequestedQuantity`,
   `NetAmount`).
+- `getLatestSalesOrder()` → `GET {ODATA}/API_SALES_ORDER_SRV/A_SalesOrder?$orderby=CreationDate desc,CreationTime desc&$top=1`
+  (fallback ordering `SalesOrder desc` if the system rejects `$orderby` on creation fields)
+  → returns the newest order's id, then reuses `getOrderSummary` for its full details.
+  Optionally scoped to the configured sales org (`SAP_SALES_ORGANIZATION`).
 - `getProcessOrder(id)` → custom `zposetra/processOrder` (response shape finalized after
   live probe; behind an adapter).
 - `getOrderStatus(id)` → custom `zposetra/status` — expected to carry the shipment number
@@ -97,8 +102,10 @@ Thin wrapper over `@anthropic-ai/sdk`.
   - If a found order has an empty field, explain it may not be available yet and offer
     (do not force) a ticket.
   - One follow-up question at a time.
-- One tool: `lookup_sap_order({ salesOrderId })`. Handler calls
-  `sapClient.getOrderSummary`.
+- Tools:
+  - `lookup_sap_order({ salesOrderId })` → handler calls `sapClient.getOrderSummary`.
+  - `get_latest_sales_order({})` → handler calls `sapClient.getLatestSalesOrder` (used for
+    "what is the last/latest order?" questions).
 - Runs the tool loop (model → tool_use → tool_result → final text) and returns
   `{ reply, orderData, needsTicket, ticketDraft }` where:
   - `orderData` = the raw normalized SAP summary (or null).
@@ -135,6 +142,12 @@ Two new routes; existing email/ticket/config routes untouched.
    summary, outcome `FOUND`.
 5. Claude composes reply; server returns reply + `orderData`.
 6. Frontend shows reply **and** an order card with the exact SAP values.
+
+**Latest order:**
+1. Customer: "What is the last order in SAP sales?"
+2. Claude calls `get_latest_sales_order({})`.
+3. `sapClient.getLatestSalesOrder()` → newest `SalesOrder` id → `getOrderSummary(id)`.
+4. Bot replies with the latest order number and its details + renders the order card.
 
 **Fallback (not found / SAP down):**
 1. Customer: "status of order 99999".

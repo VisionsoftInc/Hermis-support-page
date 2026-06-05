@@ -722,30 +722,21 @@ async function submitTicket() {
   ].join('\n').trim();
 
   try {
-    const res = await fetch(`${HERMIS_API}/api/tickets/create`, {
+    // Post through OUR server (same-origin), which forwards to the real Hermis
+    // backend (HERMIS_BACKEND_URL). This avoids the browser hitting localhost:4000
+    // and any cross-origin issues.
+    const res = await fetch('/api/support/create-ticket', {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        // Required by ticketModel.js
         customerName:  name,
         customerPhone: phone,
         customerEmail: email || '',
         subject:       subject || `${category} — support request`,
-        // Optional enrichment
         description,
         source:        'Live Chat',   // visible in Hermis as the source tag
         priority:      'MEDIUM',
         status:        'OPEN',
-        assignedTeam:  'Support Team',
-        callSummary:   summary,
-        lastCallDate:  new Date().toISOString(),
-        timeline: [{
-          action:    'CREATED',
-          by:        'Visionsoft AI (Support Page)',
-          note:      'Ticket raised from Hermis Support Page via Visionsoft AI chat',
-          toStatus:  'OPEN',
-          createdAt: new Date().toISOString(),
-        }],
       }),
     });
 
@@ -797,25 +788,46 @@ function renderOrderCard(order) {
   const container = document.getElementById('chatMessages');
   if (!container) return;
 
+  const cost = order.cost != null ? `${order.currency || ''}${order.cost}` : null;
+  let created = null;
+  if (order.createdAt) {
+    const d = new Date(order.createdAt);
+    if (!isNaN(d)) created = d.toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' });
+  }
   const rows = [
-    ['Sales Order', order.salesOrder],
-    ['Status', order.overallStatus],
-    ['Net Cost', order.netAmount ? `${order.currency || ''} ${order.netAmount}`.trim() : null],
-    ['Process Order', order.processOrder],
+    ['Posetra Order ID', order.orderId],
+    ['Sales Order (SAP)', order.salesOrder],
+    ['Purchase Order ID', order.purchaseOrderId],
+    ['Status', order.status],
+    ['Cost', cost],
+    ['Payment', order.paymentStatus],
+    ['Delivery No.', order.deliveryNumber],
     ['Shipment No.', order.shipmentNumber],
+    ['Billing/Invoice No.', order.billingNumber],
+    ['BC Order No.', order.bcOrderNumber],
+    ['BC Invoice No.', order.bcInvoiceNumber],
+    ['BC Shipment No.', order.bcShipmentNumber],
+    ['Shipment Status', order.shipmentStatus],
+    ['Invoice Status', order.invoiceStatus],
+    ['SAP Sync', order.syncStatus],
+    ['Tracking', order.trackingNumber],
+    ['Courier', order.courier],
+    ['Supplier', order.supplierName],
+    ['Created', created],
   ].filter(([, v]) => v != null && v !== '');
 
   const itemsHtml = (order.items || []).length
     ? `<div class="oc-items"><b>Items:</b><br>${order.items
-        .map((it) => `• ${it.material} × ${it.quantity} — ${order.currency || ''} ${it.netAmount}`)
+        .map((it) => `• ${it.name || it.material || 'Item'}${it.material ? ` (${it.material})` : ''} × ${it.quantity ?? 1}${it.price ? ` — ${it.price}` : ''}`)
         .join('<br>')}</div>`
     : '';
 
+  const titleNo = order.salesOrder || order.orderId || '';
   const wrap = document.createElement('div');
   wrap.classList.add('message-wrap', 'bot');
   wrap.innerHTML = `
     <div class="bot-message order-card">
-      <div class="oc-title">📦 Order ${order.salesOrder || ''}</div>
+      <div class="oc-title">📦 Order ${titleNo}</div>
       ${rows.map(([k, v]) => `<div class="oc-row"><span>${k}</span><b>${v}</b></div>`).join('')}
       ${itemsHtml}
     </div>`;

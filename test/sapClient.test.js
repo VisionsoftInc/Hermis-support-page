@@ -26,7 +26,8 @@ test('getSalesOrder normalizes a found OData entity', async () => {
   const sap = createSapClient(env, { http });
   const res = await sap.getSalesOrder('0000012345');
   assert.equal(res.outcome, 'FOUND');
-  assert.equal(res.data.salesOrder, '0000012345');
+  assert.equal(res.data.salesOrder, '12345');          // Posetra format (leading zeros stripped)
+  assert.equal(res.data.salesOrderRaw, '0000012345');  // raw SAP value kept
   assert.equal(res.data.currency, 'USD');
   assert.equal(res.data.items.length, 1);
   assert.equal(res.data.items[0].material, 'MAT01');
@@ -65,7 +66,8 @@ test('getLatestSalesOrder returns the newest order from a list', async () => {
   const sap = createSapClient(env, { http });
   const res = await sap.getLatestSalesOrder();
   assert.equal(res.outcome, 'FOUND');
-  assert.equal(res.data.salesOrder, '0000099999');
+  assert.equal(res.data.salesOrder, '99999');          // Posetra format (leading zeros stripped)
+  assert.equal(res.data.salesOrderRaw, '0000099999');
 });
 
 test('getLatestSalesOrder returns NOT_FOUND on empty list', async () => {

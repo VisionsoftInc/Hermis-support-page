@@ -5,17 +5,19 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import axios from 'axios';
 import Anthropic from '@anthropic-ai/sdk';
-import { createSapClient } from './sapClient.js';
+import { createPosetraClient } from './posetraClient.js';
 import { createAiAgent } from './aiAgent.js';
 import { createSupportRoutes } from './routes.js';
 
 dotenv.config();
 
-const sapClient = createSapClient(process.env);
+// Order data comes from the Posetra backend (which is whitelisted with SAP),
+// not from SAP directly — the support page can't reach SAP through its firewall.
+const orderClient = createPosetraClient(process.env);
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 const aiAgent = createAiAgent({
   anthropic,
-  sapClient,
+  sapClient: orderClient,
   model: process.env.ANTHROPIC_MODEL || 'claude-sonnet-4-6',
 });
 
@@ -34,8 +36,8 @@ app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// SAP order-lookup chatbot routes (/api/support/chat, /api/support/order-lookup)
-app.use('/api/support', createSupportRoutes({ sapClient, aiAgent }));
+// Order-lookup chatbot routes (/api/support/chat, /api/support/order-lookup)
+app.use('/api/support', createSupportRoutes({ sapClient: orderClient, aiAgent }));
 
 // Configuration - Using Microsoft Graph API
 const DEFAULT_HERMIS_BACKEND_URL = 'https://visionsoft-crm-backend.onrender.com';
@@ -311,7 +313,7 @@ app.post('/api/support/create-ticket', async (req, res) => {
       customerEmail: customerEmail || '',
       subject,
       description,
-      source: 'WEB',
+      source: source || 'WEB',
       priority: priority || 'MEDIUM',
       status: status || 'OPEN',
     };

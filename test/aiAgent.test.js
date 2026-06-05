@@ -9,6 +9,10 @@ function fakeAnthropic(responses) {
 }
 const text = (t) => ({ stop_reason: 'end_turn', content: [{ type: 'text', text: t }] });
 const toolUse = (name, input) => ({ stop_reason: 'tool_use', content: [{ type: 'tool_use', id: 'tu_1', name, input }] });
+const noTicketSap = {
+  getOrderSummary: async () => ({ outcome: 'NOT_FOUND', data: null }),
+  getLatestSalesOrder: async () => ({ outcome: 'NOT_FOUND', data: null }),
+};
 
 test('chat calls lookup_sap_order and returns reply + orderData, no ticket when FOUND', async () => {
   const anthropic = fakeAnthropic([
@@ -27,17 +31,24 @@ test('chat calls lookup_sap_order and returns reply + orderData, no ticket when 
   assert.equal(res.ticketDraft, null);
 });
 
-test('chat sets needsTicket and a ticketDraft when SAP says NOT_FOUND', async () => {
+test('chat does NOT auto-raise a ticket on NOT_FOUND — it only offers', async () => {
   const anthropic = fakeAnthropic([
     toolUse('lookup_sap_order', { salesOrderId: '99999' }),
-    text("I couldn't find order 99999. I can raise a ticket."),
+    text("I couldn't find order 99999. Would you like me to raise a support ticket?"),
   ]);
-  const sapClient = {
-    getOrderSummary: async () => ({ outcome: 'NOT_FOUND', data: null }),
-    getLatestSalesOrder: async () => ({ outcome: 'NOT_FOUND', data: null }),
-  };
-  const agent = createAiAgent({ anthropic, sapClient });
+  const agent = createAiAgent({ anthropic, sapClient: noTicketSap });
   const res = await agent.chat({ message: 'status of order 99999', history: [] });
+  assert.equal(res.needsTicket, false);   // no automatic ticket
+  assert.equal(res.ticketDraft, null);
+});
+
+test('chat opens the ticket form ONLY when the user asks (raise_ticket tool)', async () => {
+  const anthropic = fakeAnthropic([
+    toolUse('raise_ticket', { subject: 'Order 99999 not found', summary: 'Customer could not find order 99999.' }),
+    text('Sure — please add your name and phone below and I will log the ticket.'),
+  ]);
+  const agent = createAiAgent({ anthropic, sapClient: noTicketSap });
+  const res = await agent.chat({ message: 'yes please raise a ticket', history: [] });
   assert.equal(res.needsTicket, true);
   assert.ok(res.ticketDraft.subject.includes('99999'));
   assert.ok(res.ticketDraft.description.length > 0);

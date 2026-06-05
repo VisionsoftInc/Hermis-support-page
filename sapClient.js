@@ -16,14 +16,24 @@ function classifyError(err) {
   const status = err?.response?.status;
   if (status === 404) return 'NOT_FOUND';
   if (status === 401 || status === 403) return 'AUTH_ERROR';
-  const code = err?.code;
-  if (['ECONNABORTED', 'ECONNREFUSED', 'ETIMEDOUT', 'ENOTFOUND'].includes(code)) return 'UNREACHABLE';
+  // No HTTP response at all means the connection itself failed (timeout, refused,
+  // DNS, blocked by firewall) — treat every such case as UNREACHABLE.
+  if (status === undefined) return 'UNREACHABLE';
   return 'ERROR';
+}
+
+// Posetra shows order numbers without SAP's leading-zero padding
+// (e.g. SAP "0000012345" → Posetra "12345").
+function toPosetraNumber(v) {
+  if (v == null) return v;
+  const s = String(v).trim();
+  return /^\d+$/.test(s) ? s.replace(/^0+(?=\d)/, '') : s;
 }
 
 function normalizeSalesOrder(d) {
   return {
-    salesOrder: d.SalesOrder,
+    salesOrder: toPosetraNumber(d.SalesOrder),
+    salesOrderRaw: d.SalesOrder,
     salesOrderType: d.SalesOrderType,
     overallStatus: STATUS_TEXT[d.OverallSDProcessStatus] ?? d.OverallSDProcessStatus ?? 'Unknown',
     netAmount: d.TotalNetAmount,

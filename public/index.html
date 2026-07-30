@@ -157,7 +157,10 @@
           <div class="ai-header-status">● Online — replies instantly</div>
         </div>
       </div>
-      <button onclick="closeAIPanel()" aria-label="Close chat">✕</button>
+      <div class="ai-header-actions">
+        <button id="speakerBtn" class="speaker-btn" onclick="VoiceUI.toggleSpeaker()" title="Voice replies: on" aria-label="Toggle voice replies">🔊</button>
+        <button onclick="closeAIPanel()" aria-label="Close chat">✕</button>
+      </div>
     </div>
 
     <!-- Message list -->
@@ -196,6 +199,42 @@
 
     <!-- Input row -->
     <div class="chat-input-area">
+      <select id="voiceLang" class="voice-lang" title="Choose speech language" aria-label="Speech language">
+        <option value="auto">🌐 Auto-detect</option>
+        <optgroup label="Dubai / UAE">
+          <option value="ar-AE">العربية (Arabic)</option>
+          <option value="en-US">English</option>
+          <option value="ur-PK">اردو (Urdu)</option>
+          <option value="fa-IR">فارسی (Persian)</option>
+          <option value="fil-PH">Filipino (Tagalog)</option>
+          <option value="ru-RU">Русский (Russian)</option>
+          <option value="hi-IN">हिन्दी (Hindi)</option>
+        </optgroup>
+        <optgroup label="India">
+          <option value="hi-IN">हिन्दी (Hindi)</option>
+          <option value="te-IN">తెలుగు (Telugu)</option>
+          <option value="ml-IN">മലയാളം (Malayalam)</option>
+          <option value="ta-IN">தமிழ் (Tamil)</option>
+          <option value="kn-IN">ಕನ್ನಡ (Kannada)</option>
+          <option value="mr-IN">मराठी (Marathi)</option>
+          <option value="gu-IN">ગુજરાતી (Gujarati)</option>
+          <option value="bn-IN">বাংলা (Bengali)</option>
+          <option value="pa-IN">ਪੰਜਾਬੀ (Punjabi)</option>
+        </optgroup>
+        <optgroup label="Other">
+          <option value="en-GB">English (UK)</option>
+          <option value="es-ES">Español (Spanish)</option>
+          <option value="fr-FR">Français (French)</option>
+          <option value="de-DE">Deutsch (German)</option>
+          <option value="zh-CN">中文 (Chinese)</option>
+        </optgroup>
+      </select>
+      <button id="micBtn" class="mic-btn" onclick="VoiceUI.toggleListening()" title="Tap to talk" aria-label="Speak">
+        <svg viewBox="0 0 24 24" width="19" height="19" fill="currentColor" aria-hidden="true">
+          <path d="M12 14.5a3 3 0 0 0 3-3v-6a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3z"/>
+          <path d="M19 11.5a1 1 0 1 0-2 0 5 5 0 0 1-10 0 1 1 0 1 0-2 0 7 7 0 0 0 6 6.93V21H8a1 1 0 1 0 0 2h8a1 1 0 1 0 0-2h-3v-2.57a7 7 0 0 0 6-6.93z"/>
+        </svg>
+      </button>
       <input
         id="chatInput"
         type="text"
@@ -211,6 +250,7 @@
   <!-- ── Backdrop (click to close panel on mobile) ── -->
   <div id="aiBackdrop" class="ai-backdrop" onclick="closeAIPanel()"></div>
 
+  <script src="voice.js"></script>
   <script src="script.js"></script>
 </body>
 </html>

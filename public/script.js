@@ -867,6 +867,11 @@ async function sendMessage() {
   const userText = input.value.trim();
   if (!userText) return;
 
+  // Did this message come from the mic? If so, we'll speak the reply aloud.
+  const wasVoice = (window.VoiceUI && typeof VoiceUI.consumeVoiceTurn === 'function')
+    ? VoiceUI.consumeVoiceTurn()
+    : false;
+
   input.value = '';
   appendMessage('user', userText);
   setSendDisabled(true);
@@ -903,6 +908,11 @@ async function sendMessage() {
   const reply = data?.reply || 'I am here to help. Could you share your sales order number?';
   appendMessage('bot', reply);
   conversationHistory.push({ from: 'vira', text: reply });
+
+  // Speak the reply aloud only when the user asked by voice.
+  if (wasVoice && window.VoiceUI && typeof VoiceUI.speak === 'function') {
+    VoiceUI.speak(reply);
+  }
 
   if (data?.orderData) renderOrderCard(data.orderData);
 

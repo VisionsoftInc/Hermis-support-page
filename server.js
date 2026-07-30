@@ -318,6 +318,8 @@ app.post('/api/support/create-ticket', async (req, res) => {
       status: status || 'OPEN',
     };
 
+    // Hermis runs on Render's free tier and can take ~30-50s to wake from sleep,
+    // so allow a generous timeout to avoid a 502 on the first (cold-start) request.
     const ticketResponse = await axios.post(
       `${HERMIS_BACKEND_URL}/api/tickets/create`,
       payload,
@@ -325,7 +327,7 @@ app.post('/api/support/create-ticket', async (req, res) => {
         headers: {
           'Content-Type': 'application/json',
         },
-        timeout: 15000,
+        timeout: 60000,
       }
     );
 
